@@ -483,8 +483,8 @@
 
         <div class="nav-tabs">
             <button class="tab-btn" onclick="switchTab('standard', event)">Standard 🔢</button>
-            <button class="tab-btn active" onclick="switchTab('scientific', event)">Scientific 🔬</button>
-            <button class="tab-btn" onclick="switchTab('wordsolver', event)">Word Solver 📊</button>
+            <button class="tab-btn" onclick="switchTab('scientific', event)">Scientific 🔬</button>
+            <button class="tab-btn active" onclick="switchTab('wordsolver', event)">Word Solver 📊</button>
             <button class="tab-btn" onclick="switchTab('converter', event)">Converter 📐</button>
             <button class="tab-btn" onclick="switchTab('physics', event)">Physics ⚡</button>
             <button class="tab-btn" onclick="switchTab('graph', event)">Graph 📈</button>
@@ -522,7 +522,7 @@
         </div>
 
         <!-- 2. Scientific Calculator Panel -->
-        <div id="scientific" class="panel active">
+        <div id="scientific" class="panel">
             <input type="text" id="sci-screen" class="calc-display" value="0" readonly>
             <div class="calc-grid sci-grid">
                 <button id="btn-deg" class="calc-btn sci" onclick="toggleDegRad()">Deg</button>
@@ -537,17 +537,16 @@
 
                 <button class="calc-btn sci" onclick="appendSci('3.14159265359')">π</button>
                 <button class="calc-btn sci" onclick="appendSci('2.71828182846')">e</button>
-                <button class="calc-btn sci" onclick="appendSci(lastAnswer)">Ans</button>
+                <button class="calc-btn sci" onclick="appendSci('e')">EE</button>
                 <button class="calc-btn sci" onclick="appendSci('cbrt(')">∛</button>
 
-                <!-- Exponent & Root Buttons that append to string -->
                 <button class="calc-btn sci" onclick="appendSci('**2')">x²</button>
                 <button class="calc-btn sci" onclick="appendSci('**3')">x³</button>
                 <button class="calc-btn sci" onclick="appendSci('sqrt(')">√</button>
                 <button class="calc-btn sci" onclick="appendSci('**')">x^y</button>
 
-                <button class="calc-btn sci" onclick="appendSci('log(')">ln/log</button>
-                <button class="calc-btn sci" onclick="appendSci('*10**')">EXP</button>
+                <button class="calc-btn sci" onclick="appendSci('log(')">log</button>
+                <button class="calc-btn sci" onclick="appendSci(lastAnswer)">Ans</button>
                 <button class="calc-btn danger" onclick="allClearSci()">AC</button>
                 <button class="calc-btn danger" onclick="backspaceSci()">⌫</button>
             </div>
@@ -577,21 +576,32 @@
         </div>
 
         <!-- 3. Word Solver Panel -->
-        <div id="wordsolver" class="panel">
-            <textarea id="word-input" class="problem-textarea">A bakery makes 48 cupcakes. The baker puts an equal number of cupcakes into 6 delivery boxes. How many cupcakes are in each box?</textarea>
+        <div id="wordsolver" class="panel active">
+            <textarea id="word-input" class="problem-textarea">Sarah buys 4 bags of apples. Each bag has 6 apples. How many apples does she have in total?</textarea>
             
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <label style="font-size: 12px; font-weight: 600; color: #93c5fd; white-space: nowrap;">Operation Toggle:</label>
+                <select id="word-op-select" class="suite-select">
+                    <option value="auto">🤖 Auto-Detect</option>
+                    <option value="add">➕ Addition (+)</option>
+                    <option value="sub">➖ Subtraction (-)</option>
+                    <option value="mul" selected>✖️ Multiplication (×)</option>
+                    <option value="div">➗ Division (÷)</option>
+                </select>
+            </div>
+
             <button class="solve-btn" onclick="solveWordProblem()">Solve with Working 🚀</button>
 
             <div class="working-card">
                 <div>
                     <span class="working-title">School Working Breakdown</span>
                 </div>
-                <div class="working-step">1. Given Data: <span id="wd-given">[48, 6]</span></div>
-                <div class="working-step">2. Operation: <span id="wd-operation">Division (÷)</span></div>
-                <div class="working-step">3. Working: <span id="wd-working">48 ÷ 6 = 8</span></div>
+                <div class="working-step">1. Extracted Numbers: <span id="wd-given">[4, 6]</span></div>
+                <div class="working-step">2. Operation: <span id="wd-operation">Multiplication (×)</span></div>
+                <div class="working-step">3. Working: <span id="wd-working">4 × 6 = 24</span></div>
                 <hr style="border:none; border-top:1px dashed rgba(255,255,255,0.2); margin:4px 0;">
                 <div class="answer-box">
-                    Answer: <span id="wd-answer">8</span>
+                    Answer: <span id="wd-answer">24</span>
                 </div>
             </div>
         </div>
@@ -767,7 +777,6 @@
         function calculateResult() {
             try {
                 let sanitized = calcValue.replace(/×/g, '*').replace(/÷/g, '/');
-                // Auto-fix implicit multiplication like 6(990) -> 6*(990)
                 sanitized = sanitized.replace(/(\d)(\()/g, '$1*(');
                 let res = eval(sanitized);
                 lastAnswer = res;
@@ -828,7 +837,6 @@
             document.getElementById('sci-screen').value = sciValue === "" ? "0" : sciValue;
         }
 
-        // Helper factorial function for expression parser
         function factorial(n) {
             if (n < 0) return NaN;
             let res = 1;
@@ -836,135 +844,121 @@
             return res;
         }
 
+        const sin = (x) => {
+            let val = isDeg ? (x * Math.PI) / 180 : x;
+            return isInv ? (isDeg ? (Math.asin(val) * 180) / Math.PI : Math.asin(val)) : Math.sin(val);
+        };
+        const cos = (x) => {
+            let val = isDeg ? (x * Math.PI) / 180 : x;
+            return isInv ? (isDeg ? (Math.acos(val) * 180) / Math.PI : Math.acos(val)) : Math.cos(val);
+        };
+        const tan = (x) => {
+            let val = isDeg ? (x * Math.PI) / 180 : x;
+            return isInv ? (isDeg ? (Math.atan(val) * 180) / Math.PI : Math.atan(val)) : Math.tan(val);
+        };
+        const log = (x) => Math.log10(x);
+        const sqrt = (x) => Math.sqrt(x);
+        const cbrt = (x) => Math.cbrt(x);
+
         function calculateSci() {
             try {
                 let expr = sciValue;
-                // Replace display symbols with JavaScript evaluable equivalents
                 expr = expr.replace(/×/g, '*').replace(/÷/g, '/');
-                
-                // Implicit multiplication for brackets e.g. 6(990) -> 6*(990)
                 expr = expr.replace(/(\d)(\()/g, '$1*(');
+                expr = expr.replace(/(\d+)(!)/g, 'factorial($1)');
 
-                // Handle factorials e.g. 5! -> factorial(5)
-                expr = expr.replace(/(\d+)\!/g, 'factorial($1)');
+                const evaluated = Function('sin', 'cos', 'tan', 'log', 'sqrt', 'cbrt', 'factorial', 'pi', 'e', `return ${expr};`)(
+                    sin, cos, tan, log, sqrt, cbrt, factorial, Math.PI, Math.E
+                );
 
-                // Handle square roots and cube roots
-                expr = expr.replace(/sqrt\(/g, 'Math.sqrt(');
-                expr = expr.replace(/cbrt\(/g, 'Math.cbrt(');
-
-                // Handle log/ln
-                expr = expr.replace(/log\(/g, 'Math.log10(');
-
-                // Handle Trigonometric functions with Degree/Radian handling
-                expr = expr.replace(/sin\(/g, isInv ? '(isDeg ? Math.asin(' : 'Math.sin((');
-                expr = expr.replace(/cos\(/g, isInv ? '(isDeg ? Math.acos(' : 'Math.cos((');
-                expr = expr.replace(/tan\(/g, isInv ? '(isDeg ? Math.atan(' : 'Math.tan((');
-                
-                // If inverse, close extra brackets for degree conversion
-                if (isInv) {
-                    // Convert radian results back to degrees if in Deg mode
-                    expr += isDeg ? ')*180/Math.PI)' : ')';
-                } else if (isDeg) {
-                    // Convert degrees to radians inside trig functions
-                    expr = expr.replace(/Math\.sin\(/g, 'Math.sin((Math.PI/180)*');
-                    expr = expr.replace(/Math\.cos\(/g, 'Math.cos((Math.PI/180)*');
-                    expr = expr.replace(/Math\.tan\(/g, 'Math.tan((Math.PI/180)*');
-                }
-
-                let res = eval(expr);
-                if (typeof res === 'number' && !isNaN(res)) {
-                    lastAnswer = res;
-                    logActivity(`Scientific Expression: ${sciValue} = ${res.toFixed(4)}`);
-                    sciValue = res.toFixed(4);
-                    document.getElementById('sci-screen').value = sciValue;
-                } else {
-                    document.getElementById('sci-screen').value = "Error";
-                }
+                lastAnswer = evaluated;
+                logActivity(`Scientific: ${sciValue} = ${evaluated}`);
+                sciValue = evaluated.toString();
+                document.getElementById('sci-screen').value = sciValue;
             } catch (err) {
                 document.getElementById('sci-screen').value = "Error";
+                sciValue = "";
             }
         }
 
-        // Word Solver Logic
+        // Word Solver Logic with Operation Toggle
         function solveWordProblem() {
             const text = document.getElementById('word-input').value;
-            const numbers = text.match(/\d+/g);
+            const opChoice = document.getElementById('word-op-select').value;
             
-            if (!numbers || numbers.length < 2) {
-                alert("Please make sure there are at least two numbers in the problem.");
-                return;
+            const matches = text.match(/\d+(\.\d+)?/g);
+            let nums = matches ? matches.map(Number) : [0, 0];
+            if (nums.length < 2) nums.push(1);
+
+            let a = nums[0];
+            let b = nums[1];
+            let op = opChoice;
+
+            if (op === 'auto') {
+                const lower = text.toLowerCase();
+                if (lower.includes('each') || lower.includes('total') || lower.includes('product') || lower.includes('groups') || lower.includes('bags')) {
+                    op = 'mul';
+                } else if (lower.includes('left') || lower.includes('minus') || lower.includes('difference') || lower.includes('take')) {
+                    op = 'sub';
+                } else if (lower.includes('sum') || lower.includes('altogether') || lower.includes('more') || lower.includes('plus')) {
+                    op = 'add';
+                } else {
+                    op = 'div';
+                }
             }
-            
-            const num1 = parseFloat(numbers[0]);
-            const num2 = parseFloat(numbers[1]);
-            const lowerText = text.toLowerCase();
-            
-            let operation = "";
-            let opSymbol = "";
+
             let result = 0;
-            
-            if (lowerText.includes("altogether") || lowerText.includes("total") || (lowerText.includes("each") && !lowerText.includes("in each"))) {
-                operation = "Multiplication (×)";
-                opSymbol = "×";
-                result = num1 * num2;
-            } else {
-                operation = "Division (÷)";
-                opSymbol = "÷";
-                result = num1 / num2;
+            let opSymbol = '';
+            let opName = '';
+
+            switch(op) {
+                case 'add':
+                    result = a + b;
+                    opSymbol = '+';
+                    opName = 'Addition (+)';
+                    break;
+                case 'sub':
+                    result = a - b;
+                    opSymbol = '-';
+                    opName = 'Subtraction (-)';
+                    break;
+                case 'mul':
+                    result = a * b;
+                    opSymbol = '×';
+                    opName = 'Multiplication (×)';
+                    break;
+                case 'div':
+                    result = b !== 0 ? (a / b) % 1 === 0 ? a / b : (a / b).toFixed(4) : 'Undefined';
+                    opSymbol = '÷';
+                    opName = 'Division (÷)';
+                    break;
             }
-            
-            document.getElementById('wd-given').textContent = `[${num1}, ${num2}]`;
-            document.getElementById('wd-operation').textContent = operation;
-            document.getElementById('wd-working').textContent = `${num1} ${opSymbol} ${num2} = ${result}`;
+
+            document.getElementById('wd-given').textContent = `[${nums.join(', ')}]`;
+            document.getElementById('wd-operation').textContent = opName;
+            document.getElementById('wd-working').textContent = `${a} ${opSymbol} ${b} = ${result}`;
             document.getElementById('wd-answer').textContent = result;
-            lastAnswer = result;
-            
-            logActivity(`Word Solver: ${num1} ${opSymbol} ${num2} = ${result}`);
+            logActivity(`Word Problem Solved: ${a} ${opSymbol} ${b} = ${result}`);
         }
 
-        // Unit Converter Dictionary & Logic
-        const unitUnits = {
-            length: {
-                m: { name: 'Meters (m)', base: 1 },
-                km: { name: 'Kilometers (km)', base: 1000 },
-                cm: { name: 'Centimeters (cm)', base: 0.01 },
-                mm: { name: 'Millimeters (mm)', base: 0.001 },
-                mi: { name: 'Miles (mi)', base: 1609.344 },
-                yd: { name: 'Yards (yd)', base: 0.9144 },
-                ft: { name: 'Feet (ft)', base: 0.3048 },
-                in: { name: 'Inches (in)', base: 0.0254 }
-            },
-            weight: {
-                kg: { name: 'Kilograms (kg)', base: 1 },
-                g: { name: 'Grams (g)', base: 0.001 },
-                mg: { name: 'Milligrams (mg)', base: 0.000001 },
-                lb: { name: 'Pounds (lbs)', base: 0.453592 },
-                oz: { name: 'Ounces (oz)', base: 0.0283495 }
-            },
-            temp: {
-                C: { name: 'Celsius (°C)' },
-                F: { name: 'Fahrenheit (°F)' },
-                K: { name: 'Kelvin (K)' }
-            }
+        // Unit Converter Logic
+        const unitData = {
+            length: { units: ['Meters', 'Centimeters', 'Kilometers', 'Inches', 'Feet'], rates: { 'Meters': 1, 'Centimeters': 0.01, 'Kilometers': 1000, 'Inches': 0.0254, 'Feet': 0.3048 } },
+            weight: { units: ['Kilograms', 'Grams', 'Pounds', 'Ounces'], rates: { 'Kilograms': 1, 'Grams': 0.001, 'Pounds': 0.453592, 'Ounces': 0.0283495 } },
+            temp: { units: ['Celsius', 'Fahrenheit', 'Kelvin'] }
         };
 
         function updateConverterUnits() {
             const cat = document.getElementById('conv-category').value;
             const fromSelect = document.getElementById('conv-from');
             const toSelect = document.getElementById('conv-to');
-            
             fromSelect.innerHTML = '';
             toSelect.innerHTML = '';
-            
-            const units = unitUnits[cat];
-            for (let key in units) {
-                fromSelect.add(new Option(units[key].name, key));
-                toSelect.add(new Option(units[key].name, key));
-            }
-            
-            if (toSelect.options.length > 1) {
-                toSelect.selectedIndex = 1;
-            }
+            unitData[cat].units.forEach(u => {
+                fromSelect.add(new Option(u, u));
+                toSelect.add(new Option(u, u));
+            });
+            if(toSelect.options.length > 1) toSelect.selectedIndex = 1;
             convertUnits();
         }
 
@@ -973,248 +967,176 @@
             const val = parseFloat(document.getElementById('conv-val').value) || 0;
             const from = document.getElementById('conv-from').value;
             const to = document.getElementById('conv-to').value;
-            
-            let result = 0;
-            let fromName = unitUnits[cat][from].name;
-            let toName = unitUnits[cat][to].name;
+            let resultText = "";
 
             if (cat === 'temp') {
                 let celsius = val;
-                if (from === 'F') celsius = (val - 32) * 5/9;
-                else if (from === 'K') celsius = val - 273.15;
+                if (from === 'Fahrenheit') celsius = (val - 32) * 5/9;
+                if (from === 'Kelvin') celsius = val - 273.15;
 
-                if (to === 'C') result = celsius;
-                else if (to === 'F') result = (celsius * 9/5) + 32;
-                else if (to === 'K') result = celsius + 273.15;
+                let finalVal = celsius;
+                if (to === 'Fahrenheit') finalVal = celsius * 9/5 + 32;
+                if (to === 'Kelvin') finalVal = celsius + 273.15;
+                resultText = `${val} ${from} = ${finalVal.toFixed(2)} ${to}`;
             } else {
-                let baseVal = val * unitUnits[cat][from].base;
-                result = baseVal / unitUnits[cat][to].base;
+                const rates = unitData[cat].rates;
+                const baseVal = val * rates[from];
+                const finalVal = baseVal / rates[to];
+                resultText = `${val} ${from} = ${finalVal.toFixed(4)} ${to}`;
             }
-
-            document.getElementById('conv-result').textContent = `Result: ${val} ${fromName} = ${result.toFixed(4)} ${toName}`;
+            document.getElementById('conv-result').textContent = `Result: ${resultText}`;
+            logActivity(`Converted ${val} ${from} to ${to}`);
         }
 
         // Physics Suite Logic
+        const physicsFormulas = {
+            speed: { name: 'Speed (v = d / t)', inputs: [{ id: 'dist', label: 'Distance (d)', val: '100' }, { id: 'time', label: 'Time (t)', val: '2' }], calc: (p) => p.dist / p.time, unit: 'm/s' },
+            force: { name: 'Force (F = m × a)', inputs: [{ id: 'mass', label: 'Mass (m)', val: '10' }, { id: 'acc', label: 'Acceleration (a)', val: '9.8' }], calc: (p) => p.mass * p.acc, unit: 'N' },
+            ohm: { name: 'Ohm\'s Law (V = I × R)', inputs: [{ id: 'curr', label: 'Current (I)', val: '2' }, { id: 'res', label: 'Resistance (R)', val: '5' }], calc: (p) => p.curr * p.res, unit: 'V' },
+            ke: { name: 'Kinetic Energy (KE = 0.5 × m × v²)', inputs: [{ id: 'mass', label: 'Mass (m)', val: '50' }, { id: 'vel', label: 'Velocity (v)', val: '10' }], calc: (p) => 0.5 * p.mass * (p.vel ** 2), unit: 'J' },
+            pe: { name: 'Potential Energy (PE = m × g × h)', inputs: [{ id: 'mass', label: 'Mass (m)', val: '10' }, { id: 'g', label: 'Gravity (g)', val: '9.8' }, { id: 'h', label: 'Height (h)', val: '5' }], calc: (p) => p.mass * p.g * p.h, unit: 'J' },
+            density: { name: 'Density (ρ = m / V)', inputs: [{ id: 'mass', label: 'Mass (m)', val: '100' }, { id: 'vol', label: 'Volume (V)', val: '20' }], calc: (p) => p.mass / p.vol, unit: 'kg/m³' }
+        };
+
         function updatePhysicsInputs() {
-            const formula = document.getElementById('phys-formula').value;
+            const key = document.getElementById('phys-formula').value;
             const container = document.getElementById('phys-inputs-container');
             container.innerHTML = '';
-
-            if (formula === 'speed') {
-                container.innerHTML = `
-                    <div class="converter-row">
-                        <div><label style="font-size:10px;">Distance (m)</label><input type="number" id="phys-d" class="suite-input-small" value="100" oninput="calculatePhysics()"></div>
-                        <div><label style="font-size:10px;">Time (s)</label><input type="number" id="phys-t" class="suite-input-small" value="10" oninput="calculatePhysics()"></div>
-                    </div>`;
-            } else if (formula === 'force') {
-                container.innerHTML = `
-                    <div class="converter-row">
-                        <div><label style="font-size:10px;">Mass (kg)</label><input type="number" id="phys-m" class="suite-input-small" value="10" oninput="calculatePhysics()"></div>
-                        <div><label style="font-size:10px;">Acceleration (m/s²)</label><input type="number" id="phys-a" class="suite-input-small" value="5" oninput="calculatePhysics()"></div>
-                    </div>`;
-            } else if (formula === 'ohm') {
-                container.innerHTML = `
-                    <div class="converter-row">
-                        <div><label style="font-size:10px;">Current (I in Amps)</label><input type="number" id="phys-i" class="suite-input-small" value="2" oninput="calculatePhysics()"></div>
-                        <div><label style="font-size:10px;">Resistance (R in Ohms)</label><input type="number" id="phys-r" class="suite-input-small" value="10" oninput="calculatePhysics()"></div>
-                    </div>`;
-            } else if (formula === 'ke') {
-                container.innerHTML = `
-                    <div class="converter-row">
-                        <div><label style="font-size:10px;">Mass (kg)</label><input type="number" id="phys-mk" class="suite-input-small" value="5" oninput="calculatePhysics()"></div>
-                        <div><label style="font-size:10px;">Velocity (m/s)</label><input type="number" id="phys-vk" class="suite-input-small" value="4" oninput="calculatePhysics()"></div>
-                    </div>`;
-            } else if (formula === 'pe') {
-                container.innerHTML = `
-                    <div class="converter-row">
-                        <div><label style="font-size:10px;">Mass (kg)</label><input type="number" id="phys-mp" class="suite-input-small" value="10" oninput="calculatePhysics()"></div>
-                        <div><label style="font-size:10px;">Height (m)</label><input type="number" id="phys-h" class="suite-input-small" value="5" oninput="calculatePhysics()"></div>
-                    </div>`;
-            } else if (formula === 'density') {
-                container.innerHTML = `
-                    <div class="converter-row">
-                        <div><label style="font-size:10px;">Mass (kg)</label><input type="number" id="phys-md" class="suite-input-small" value="20" oninput="calculatePhysics()"></div>
-                        <div><label style="font-size:10px;">Volume (m³)</label><input type="number" id="phys-vol" class="suite-input-small" value="4" oninput="calculatePhysics()"></div>
-                    </div>`;
-            }
+            const formula = physicsFormulas[key];
+            formula.inputs.forEach(inp => {
+                container.innerHTML += `
+                    <div>
+                        <label style="font-size:10px;">${inp.label}</label>
+                        <input type="number" id="phys-${inp.id}" class="suite-input-small" value="${inp.val}" oninput="calculatePhysics()">
+                    </div>
+                `;
+            });
             calculatePhysics();
         }
 
         function calculatePhysics() {
-            const formula = document.getElementById('phys-formula').value;
-            let resultText = "";
-
-            if (formula === 'speed') {
-                let d = parseFloat(document.getElementById('phys-d').value) || 0;
-                let t = parseFloat(document.getElementById('phys-t').value) || 1;
-                let v = d / t;
-                resultText = `Speed (v) = ${v.toFixed(2)} m/s`;
-            } else if (formula === 'force') {
-                let m = parseFloat(document.getElementById('phys-m').value) || 0;
-                let a = parseFloat(document.getElementById('phys-a').value) || 0;
-                let f = m * a;
-                resultText = `Force (F) = ${f.toFixed(2)} N`;
-            } else if (formula === 'ohm') {
-                let i = parseFloat(document.getElementById('phys-i').value) || 0;
-                let r = parseFloat(document.getElementById('phys-r').value) || 0;
-                let v = i * r;
-                resultText = `Voltage (V) = ${v.toFixed(2)} V`;
-            } else if (formula === 'ke') {
-                let m = parseFloat(document.getElementById('phys-mk').value) || 0;
-                let v = parseFloat(document.getElementById('phys-vk').value) || 0;
-                let ke = 0.5 * m * (v ** 2);
-                resultText = `Kinetic Energy (KE) = ${ke.toFixed(2)} Joules`;
-            } else if (formula === 'pe') {
-                let m = parseFloat(document.getElementById('phys-mp').value) || 0;
-                let h = parseFloat(document.getElementById('phys-h').value) || 0;
-                let g = 9.81;
-                let pe = m * g * h;
-                resultText = `Potential Energy (PE) = ${pe.toFixed(2)} Joules`;
-            } else if (formula === 'density') {
-                let m = parseFloat(document.getElementById('phys-md').value) || 0;
-                let vol = parseFloat(document.getElementById('phys-vol').value) || 1;
-                let rho = m / vol;
-                resultText = `Density (ρ) = ${rho.toFixed(2)} kg/m³`;
+            const key = document.getElementById('phys-formula').value;
+            const formula = physicsFormulas[key];
+            const params = {};
+            let valid = true;
+            formula.inputs.forEach(inp => {
+                const val = parseFloat(document.getElementById(`phys-${inp.id}`).value);
+                if (isNaN(val)) valid = false;
+                params[inp.id] = val;
+            });
+            if (!valid) {
+                document.getElementById('phys-result').textContent = "Please enter valid numbers";
+                return;
             }
-
-            document.getElementById('phys-result').textContent = `Result: ${resultText}`;
+            const res = formula.calc(params);
+            document.getElementById('phys-result').textContent = `Result: ${formula.name.split(' ')[0]} = ${res.toFixed(2)} ${formula.unit}`;
+            logActivity(`Physics calculated: ${formula.name.split(' ')[0]} = ${res.toFixed(2)} ${formula.unit}`);
         }
 
-        // Graphing Engine
-        let graphScale = 50;
+        // Graph Plotter Interactivity
+        let graphScale = 40;
         let graphOffsetX = 0;
         let graphOffsetY = 0;
         let isDragging = false;
-        let startX = 0, startY = 0;
+        let startX, startY;
 
-        function resetGraphView() {
-            graphScale = 50;
-            graphOffsetX = 0;
-            graphOffsetY = 0;
-            drawGraph();
-        }
-
-        function drawGraph() {
+        function initGraphCanvas() {
             const canvas = document.getElementById('graphCanvas');
-            const ctx = canvas.getContext('2d');
-            const funcStr = document.getElementById('func-input').value;
+            if (!canvas) return;
 
             canvas.width = canvas.parentElement.clientWidth;
             canvas.height = canvas.parentElement.clientHeight;
 
+            canvas.onmousedown = (e) => {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+            };
+            window.onmousemove = (e) => {
+                if (!isDragging) return;
+                graphOffsetX += (e.clientX - startX);
+                graphOffsetY += (e.clientY - startY);
+                startX = e.clientX;
+                startY = e.clientY;
+                drawGraph();
+            };
+            window.onmouseup = () => { isDragging = false; };
+            canvas.onwheel = (e) => {
+                e.preventDefault();
+                if (e.deltaY < 0) graphScale *= 1.1;
+                else graphScale /= 1.1;
+                drawGraph();
+            };
+        }
+
+        function resetGraphView() {
+            graphScale = 40;
+            graphOffsetX = 0;
+            graphOffsetY = 0;
+            drawGraph();
+            logActivity("Graph view reset");
+        }
+
+        function drawGraph() {
+            const canvas = document.getElementById('graphCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if (canvas.width !== canvas.parentElement.clientWidth || canvas.height !== canvas.parentElement.clientHeight) {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const centerX = canvas.width / 2 + graphOffsetX;
-            const centerY = canvas.height / 2 + graphOffsetY;
+            const width = canvas.width;
+            const height = canvas.height;
+            const centerX = width / 2 + graphOffsetX;
+            const centerY = height / 2 + graphOffsetY;
 
-            let step = graphScale;
-            if (step < 25) step *= 2;
-            if (step > 100) step /= 2;
-
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
             ctx.lineWidth = 1;
 
-            let startGridX = centerX % step;
-            for (let x = startGridX; x < canvas.width; x += step) {
-                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+            for (let x = centerX % graphScale; x < width; x += graphScale) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+            }
+            for (let y = centerY % graphScale; y < height; y += graphScale) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
             }
 
-            let startGridY = centerY % step;
-            for (let y = startGridY; y < canvas.height; y += step) {
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
-            }
-
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
             ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(0, centerY); ctx.lineTo(canvas.width, centerY);
-            ctx.moveTo(centerX, 0); ctx.lineTo(centerX, canvas.height);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height); ctx.stroke();
 
-            ctx.strokeStyle = '#facc15';
+            const funcStr = document.getElementById('func-input').value;
+            ctx.strokeStyle = '#38bdf8';
             ctx.lineWidth = 3;
             ctx.beginPath();
 
             let first = true;
-            for (let px = 0; px <= canvas.width; px += 2) {
+            for (let px = 0; px < width; px += 2) {
                 let x = (px - centerX) / graphScale;
                 try {
-                    let y = eval(funcStr);
-                    if (!isFinite(y)) continue;
+                    let sanitized = funcStr.replace(/\^/g, '**');
+                    let y = Function('x', 'Math', `return ${sanitized};`)(x, Math);
                     let py = centerY - (y * graphScale);
-
                     if (first) {
                         ctx.moveTo(px, py);
                         first = false;
                     } else {
                         ctx.lineTo(px, py);
                     }
-                } catch {}
+                } catch (e) {}
             }
             ctx.stroke();
-
-            ctx.fillStyle = '#93c5fd';
-            ctx.font = '11px sans-serif';
-            ctx.fillText(`Scale: ${graphScale.toFixed(0)}px/unit`, 12, 22);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const canvas = document.getElementById('graphCanvas');
-
-            canvas.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                let zoomFactor = e.deltaY < 0 ? 1.15 : 0.85;
-                
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = e.clientX - rect.left;
-                const mouseY = e.clientY - rect.top;
-
-                const centerX = canvas.width / 2 + graphOffsetX;
-                const centerY = canvas.height / 2 + graphOffsetY;
-
-                let xVal = (mouseX - centerX) / graphScale;
-                let yVal = (centerY - mouseY) / graphScale;
-
-                graphScale *= zoomFactor;
-                if (graphScale < 10) graphScale = 10;
-                if (graphScale > 1000) graphScale = 1000;
-
-                graphOffsetX = mouseX - (canvas.width / 2 + xVal * graphScale);
-                graphOffsetY = (mouseY - canvas.height / 2) + yVal * graphScale;
-
-                drawGraph();
-            }, { passive: false });
-
-            canvas.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                let dx = e.clientX - startX;
-                let dy = e.clientY - startY;
-                startX = e.clientX;
-                startY = e.clientY;
-
-                graphOffsetX += dx;
-                graphOffsetY += dy;
-                drawGraph();
-            });
-
-            window.addEventListener('mouseup', () => {
-                isDragging = false;
-            });
-
+        window.onload = () => {
             updateConverterUnits();
             updatePhysicsInputs();
-        });
-
-        window.onresize = function() {
-            if (document.getElementById('graph').classList.contains('active')) {
-                drawGraph();
-            }
+            initGraphCanvas();
+            solveWordProblem();
+            logActivity("DPS Innovista 2026 suite loaded successfully");
         };
     </script>
 </body>
